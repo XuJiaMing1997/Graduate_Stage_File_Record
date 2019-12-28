@@ -1,0 +1,155 @@
+# ############################################# Machine 1 ##########################################################
+#!/usr/bin/env bash
+source activate pytorch36
+
+# MIE_SBP
+# python train_pro.py --save_step 4 --eval_step 2 --target_dataset_name DUKE
+python train_pro.py --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+
+
+# #####################################
+# TODO: !!!! OP
+# Pretrain
+# TODO: !!!! Switch to OP Mode
+# TODO: !!!! Add DatasetName suffix
+# TODO: !!!! Add SBP dir argparse (Duke, CUHK03)
+python train_pro.py --lr_start 0.0001 --save_step 2 --eval_step 2 --dropout_rate 0.6 --if_weight_softmax --weight_softmax_value 4.0 --zoom_out_pad_prob 0.3 --if_load_SBP
+python train_pro.py --lr_start 0.0001 --save_step 2 --eval_step 2 --dropout_rate 0.6 --if_weight_softmax --weight_softmax_value 4.0 --zoom_out_pad_prob 0.3 --if_load_SBP
+# TODO: Check acc on RAP
+# #####################################
+# #####################################  START PARALLEL  ###################################
+
+# Attention num_discuss
+# Market
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 1 --save_step 4 --eval_step 2
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 2 --save_step 4 --eval_step 2
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 16 --save_step 4 --eval_step 2
+
+# independent evaluate for acc check, log file check
+# rerank
+# Euclidean
+
+
+
+# different image size
+# 224x224, 128x64
+
+
+# Adam
+# Full model, No MLoss
+python train_pro.py --optim_name Adam --Lr_Start 0.00035 --addSTNPart --STN_lr_start 0.0000001 --STN_init_value 1.0 --STN_freeze_end_ep 90 --if_load_STN_SBP_model --SBP_model_dir ./MIE/MIE_SBP/Market_SBP/model_save-CS-MARKET/pytorch_MIE_104.pth --if_affine --addOrientationPart --OP_lr_start 0.00001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/model_save-lr_0.0001-WT4.0-DP0.6-ZP0.3-SBPLy2/OP-lr_0.0001-WT4.0-DP0.6-ZP0.3-SBPLy2_256x128_59.pth --if_OP_channel_wise --addChannelReduce --final_dim 2048 --addAttentionMaskPart --save_step 4 --eval_step 2
+# Full model + MLoss
+python train_pro.py --optim_name Adam --Lr_Start 0.00035 --addSTNPart --STN_lr_start 0.0000001 --STN_init_value 1.0 --STN_freeze_end_ep 90 --if_load_STN_SBP_model --SBP_model_dir ./MIE/MIE_SBP/Market_SBP/model_save-CS-MARKET/pytorch_MIE_104.pth --if_affine --addOrientationPart --OP_lr_start 0.00001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/model_save-lr_0.0001-WT4.0-DP0.6-ZP0.3-SBPLy2/OP-lr_0.0001-WT4.0-DP0.6-ZP0.3-SBPLy2_256x128_59.pth --if_OP_channel_wise --addChannelReduce --final_dim 2048 --addAttentionMaskPart --mask_loss_switch --binary_threshold 0.8 --area_constrain_proportion 0.2 --mask_loss_weight 0.001 --save_step 4 --eval_step 2
+
+# ############################################# Machine 1 ##########################################################
+
+
+
+
+
+
+
+
+# ############################################# Machine 2 DUKE ##########################################################
+source activate pytorch36
+
+# ./SBP/DUKE_pytorch_SBP_100.pth
+# ./OP/OP-DUKE_SBP_100_256x128_52.pth
+
+
+# TODO: Change Train Batch 64 (11G not SUPPORT)
+# TODO: Check Pytorch run
+# Full Model, No MLoss
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addSTNPart --STN_lr_start 0.00001 --STN_init_value 1.0 --STN_freeze_end_ep 90 --if_load_STN_SBP_model --SBP_model_dir ./SBP/DUKE_pytorch_SBP_100.pth --if_affine --addOrientationPart --OP_lr_start 0.001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/OP-DUKE_SBP_100_256x128_52.pth --if_OP_channel_wise --addChannelReduce --final_dim 2048 --addAttentionMaskPart --save_step 4 --eval_step 2 --target_dataset_name DUKE
+# #####################################  START PARALLEL  ###################################
+
+
+# Full Model + MLoss
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addSTNPart --STN_lr_start 0.00001 --STN_init_value 1.0 --STN_freeze_end_ep 90 --if_load_STN_SBP_model --SBP_model_dir ./SBP/DUKE_pytorch_SBP_100.pth --if_affine --addOrientationPart --OP_lr_start 0.001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/OP-DUKE_SBP_100_256x128_52.pth --if_OP_channel_wise --addChannelReduce --final_dim 2048 --addAttentionMaskPart --mask_loss_switch --binary_threshold 0.8 --area_constrain_proportion 0.2 --mask_loss_weight 0.001 --save_step 4 --eval_step 2 --target_dataset_name DUKE
+
+
+# Attention num_discuss
+# Duke
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 1 --save_step 4 --eval_step 2 --target_dataset_name DUKE
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 2 --save_step 4 --eval_step 2 --target_dataset_name DUKE
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 4 --save_step 4 --eval_step 2 --target_dataset_name DUKE
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 8 --save_step 4 --eval_step 2 --target_dataset_name DUKE
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 16 --save_step 4 --eval_step 2 --target_dataset_name DUKE
+
+
+# Orientation Sensitive Merge Strategy
+# Duke
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addOrientationPart --OP_lr_start 0.001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/OP-DUKE_SBP_100_256x128_52.pth --if_OP_channel_wise --save_step 4 --eval_step 2 --target_dataset_name DUKE
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addOrientationPart --OP_lr_start 0.001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/OP-DUKE_SBP_100_256x128_52.pth --if_OP_channel_wise --addChannelReduce --final_dim 2048 --save_step 4 --eval_step 2 --target_dataset_name DUKE
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addOrientationPart --OP_lr_start 0.001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/OP-DUKE_SBP_100_256x128_52.pth --save_step 4 --eval_step 2 --target_dataset_name DUKE
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addOrientationPart --OP_lr_start 0.001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/OP-DUKE_SBP_100_256x128_52.pth --addChannelReduce --final_dim 1024 --save_step 4 --eval_step 2 --target_dataset_name DUKE
+
+
+# Affine Transformation Init Value
+# Duke
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addSTNPart --STN_lr_start 0.00001 --STN_init_value 1.0 --STN_freeze_end_ep 60 --if_load_STN_SBP_model --SBP_model_dir ./SBP/DUKE_pytorch_SBP_100.pth --if_affine --save_step 4 --eval_step 2 --target_dataset_name DUKE
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addSTNPart --STN_lr_start 0.00001 --STN_init_value 0.9 --STN_freeze_end_ep 60 --if_load_STN_SBP_model --SBP_model_dir ./SBP/DUKE_pytorch_SBP_100.pth --if_affine --save_step 4 --eval_step 2 --target_dataset_name DUKE
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addSTNPart --STN_lr_start 0.00001 --STN_init_value 0.8 --STN_freeze_end_ep 60 --if_load_STN_SBP_model --SBP_model_dir ./SBP/DUKE_pytorch_SBP_100.pth --if_affine --save_step 4 --eval_step 2 --target_dataset_name DUKE
+
+
+# Affine Transformation Affine vs. Perspective
+# Perspective + b_1.0
+# Duke
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addSTNPart --STN_lr_start 0.00001 --STN_init_value 1.0 --STN_freeze_end_ep 60 --if_load_STN_SBP_model --SBP_model_dir ./SBP/DUKE_pytorch_SBP_100.pth --save_step 4 --eval_step 2 --target_dataset_name DUKE
+
+# ############################################# Machine 2 DUKE ##########################################################
+
+
+
+
+
+
+# ############################################# Machine 3 CUHK03 ##########################################################
+source activate pytorch36
+
+# ./SBP/CUHK03_pytorch_SBP_112.pth
+# ./OP/OP_CUHK03_SBP_112_256x128_56.pth
+
+# TODO: Change Train Batch 64 (11G not SUPPORT)
+# TODO: Check Pytorch run
+# Full Model, No MLoss
+python train_pro.py --optim_name Adam --Lr_Start 0.035 --addSTNPart --STN_lr_start 0.00001 --STN_init_value 1.0 --STN_freeze_end_ep 90 --if_load_STN_SBP_model --SBP_model_dir ./SBP/CUHK03_pytorch_SBP_112.pth --if_affine --addOrientationPart --OP_lr_start 0.001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/OP_CUHK03_SBP_112_256x128_56.pth --if_OP_channel_wise --addChannelReduce --final_dim 2048 --addAttentionMaskPart --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+# #####################################  START PARALLEL  ###################################
+
+
+# Full Model + MLoss
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addSTNPart --STN_lr_start 0.00001 --STN_init_value 1.0 --STN_freeze_end_ep 90 --if_load_STN_SBP_model --SBP_model_dir ./SBP/CUHK03_pytorch_SBP_112.pth --if_affine --addOrientationPart --OP_lr_start 0.001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/OP_CUHK03_SBP_112_256x128_56.pth --if_OP_channel_wise --addChannelReduce --final_dim 2048 --addAttentionMaskPart --mask_loss_switch --binary_threshold 0.8 --area_constrain_proportion 0.2 --mask_loss_weight 0.001 --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+
+
+# Attention num_discuss
+# CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 1 --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 2 --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 4 --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 8 --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addAttentionMaskPart --mask_num 16 --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+
+
+# Orientation Sensitive Merge Strategy
+# CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addOrientationPart --OP_lr_start 0.001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/OP_CUHK03_SBP_112_256x128_56.pth --if_OP_channel_wise --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addOrientationPart --OP_lr_start 0.001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/OP_CUHK03_SBP_112_256x128_56.pth --if_OP_channel_wise --addChannelReduce --final_dim 2048 --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addOrientationPart --OP_lr_start 0.001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/OP_CUHK03_SBP_112_256x128_56.pth --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addOrientationPart --OP_lr_start 0.001 --OP_freeze_end_ep 0 --if_load_OP_model --OP_model_dir ./OP/OP_CUHK03_SBP_112_256x128_56.pth --addChannelReduce --final_dim 1024 --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+
+
+# Affine Transformation Init Value
+# CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addSTNPart --STN_lr_start 0.00001 --STN_init_value 1.0 --STN_freeze_end_ep 60 --if_load_STN_SBP_model --SBP_model_dir ./SBP/CUHK03_pytorch_SBP_112.pth --if_affine --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addSTNPart --STN_lr_start 0.00001 --STN_init_value 0.9 --STN_freeze_end_ep 60 --if_load_STN_SBP_model --SBP_model_dir ./SBP/CUHK03_pytorch_SBP_112.pth --if_affine --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addSTNPart --STN_lr_start 0.00001 --STN_init_value 0.8 --STN_freeze_end_ep 60 --if_load_STN_SBP_model --SBP_model_dir ./SBP/CUHK03_pytorch_SBP_112.pth --if_affine --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+
+
+# Affine Transformation Affine vs. Perspective
+# Perspective + b_1.0
+# CUHK03
+python train_pro.py --optim_name SGD --Lr_Start 0.035 --addSTNPart --STN_lr_start 0.00001 --STN_init_value 1.0 --STN_freeze_end_ep 60 --if_load_STN_SBP_model --SBP_model_dir ./SBP/CUHK03_pytorch_SBP_112.pth --save_step 4 --eval_step 2 --target_dataset_name CUHK03
+
+# ############################################# Machine 3 CUHK03 ##########################################################
+
+
